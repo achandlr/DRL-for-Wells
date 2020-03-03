@@ -1,16 +1,18 @@
-import gym
-
-from stable_baselines import A2C
 from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common.vec_env import DummyVecEnv
+from stable_baselines import ACKTR
+from env.field_env import FieldEnv
 
-# Create and wrap the environment
-env = gym.make('LunarLander-v2')
-env = DummyVecEnv([lambda: env])
 
-model = A2C(MlpPolicy, env, ent_coef=0.1, verbose=1)
-# Train the agent
-model.learn(total_timesteps=100000)
+print("Setting up env");
+env = DummyVecEnv([lambda: FieldEnv()])
+model = ACKTR(MlpPolicy, env, verbose=1, tensorboard_log="./tensey/")
+#model.learn(50000)
+print("About to start");
+model.learn(10000000)
+
+
+
 # Save the agent
-model.save("a2c_lunar")
+model.save("field-env-10000000-acktr")
 

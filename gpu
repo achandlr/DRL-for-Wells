@@ -1,0 +1,12 @@
+Executable = /bin/bash
+arguments = gpu.sh
+Log = gpu.log
+output = gpu.output.$(Process)
+error = gpu.error.$(Process)
+
+requirements = InMastodon
++Group = "UNDER"
++Project = "OTHER"
++ProjectDescription = "Testing Mastodon before training a NN on it"
+
+Queue
