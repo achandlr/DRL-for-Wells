@@ -1,4 +1,5 @@
 #!/bin/bash
 
-conda activate energyanalytics
-pip install -r requirements.txt
+conda install --yes --file ml.yml
+conda install --yes --file mlcpu.yml
+
