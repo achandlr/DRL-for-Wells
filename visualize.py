@@ -1,27 +1,52 @@
-from stable_baselines.common.policies import MlpPolicy
-from stable_baselines.common.vec_env import DummyVecEnv
-from stable_baselines import PPO2
+from stable_baselines.a2c.utils import conv, linear, conv_to_fc
+import sys
+import tensorflow as tf
+import numpy as np
+from stable_baselines.common.policies import FeedForwardPolicy, MlpPolicy, MlpLstmPolicy, MlpLnLstmPolicy, CnnPolicy, CnnLstmPolicy, CnnLnLstmPolicy
+from stable_baselines.common.vec_env import DummyVecEnv, SubprocVecEnv
+from stable_baselines.common import set_global_seeds
+from stable_baselines import ACKTR, PPO2
 from env.field_env import FieldEnv
 
+def make_env(env_class, rank, seed=0):
+    """
+    Utility function for multiprocessed env.
+    
+    :param env_id: (str) the environment ID
+    :param seed: (int) the inital seed for RNG
+    :param rank: (int) index of the subprocess
+    """
+    def _init():
+        env = env_class()
+        # Important: use a different seed for each environment
+        env.seed(seed + rank)
+        return env
+    set_global_seeds(seed)
+    return _init
 
-env = DummyVecEnv([lambda: FieldEnv()])
-#model = PPO2(MlpPolicy, env, learning_rate=0.001)
+def run():
+    print("Setting up env")
 
-model = PPO2.load("field-env-1000000-a2c")
+    n_procs = 8
+    env = DummyVecEnv([make_env(FieldEnv, i+1) for i in range(1)])
 
-obs = env.reset()
-sumRew = 0
-episodeCount = 0
-for i in range(1000):
-    action, _states = model.predict(obs)
-    obs, rewards, dones, info = env.step(action)
-    if dones:
-        sumRew = 0
-        print("Resetting reward")
-        episodeCount += 1
-        print(f"Episode ${episodeCount}")
-    sumRew += rewards
-    print(f"reward total = ${sumRew}")
-    env.render()
-    if dones:
-        break
+    print("Setting up model")
+
+    model = PPO2.load("field-env-10000000-ppo2-MlpPolicy.zip")
+
+    obs = env.reset()
+    state = None
+
+    zero_completed_obs = np.zeros((n_procs,) + env.observation_space.shape)
+    zero_completed_obs[0, :] = obs
+
+    for _ in range(1000):
+        action, state = model.predict(zero_completed_obs, state=state)
+        obs, reward , done, _ = env.step(action)
+        zero_completed_obs[0, :] = obs
+        env.render()
+        input("hello")
+
+
+if __name__ == '__main__':
+    run()

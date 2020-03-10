@@ -1,0 +1,44 @@
+name: ml
+channels:
+    - conda-forge
+dependencies:
+    #base packages
+    - python=3.6
+    - anaconda
+    - numpy
+    - matplotlib
+    - seaborn
+    - jupyter
+    - pillow
+    - pydot
+    - h5py
+    - panel
+    #spatial, statistics and data handling
+    - geopandas
+    - cartopy
+    - pysal
+    - verde
+    - statsmodels
+    - uncertainties
+    #machine learning packages
+    - tensorflow-gpu=1.14.0
+    - keras-gpu
+    - missingno
+    #things that need pip
+    - pip
+    - pip:
+      - sklearn
+      - hurst
+      - xgboost
+      #for machine learning algos
+      - stable-baselines
+      - ffmpeg
+    #geo specific packages
+      - bruges
+      - segyio
+      - lasio
+      - welly
+      - striplog
+      - pyvista
+      - pvgeo
+      - geostatspy  

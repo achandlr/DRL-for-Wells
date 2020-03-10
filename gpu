@@ -1,12 +1,30 @@
 Executable = /bin/bash
-arguments = gpu.sh
-Log = gpu.log
-output = gpu.output.$(Process)
-error = gpu.error.$(Process)
+Log = clogs/log
+output = clogs/output.$(Process)
+error = clogs/error.$(Process)
 
-requirements = InMastodon
+requirements = Cuda8 && TARGET.GPUSlot && InMastodon
+request_GPUs = 1
++GPUJOB = true && NumJobStarts == 0
 +Group = "UNDER"
 +Project = "OTHER"
 +ProjectDescription = "Testing Mastodon before training a NN on it"
 
+arguments = gpu.sh MlpPolicy y
+Queue
+arguments = gpu.sh MlpPolicy n
+Queue
+arguments = gpu.sh MlpPolicy nr
+Queue
+arguments = gpu.sh MlpLstmPolicy y
+Queue
+arguments = gpu.sh MlpLstmPolicy n
+Queue
+arguments = gpu.sh MlpLstmPolicy nr
+Queue
+arguments = gpu.sh MlpLnLstmPolicy y
+Queue
+arguments = gpu.sh MlpLnLstmPolicy n
+Queue
+arguments = gpu.sh MlpLnLstmPolicy nr
 Queue
