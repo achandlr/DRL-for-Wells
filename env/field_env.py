@@ -26,6 +26,7 @@ class FieldEnv(gym.Env):
         _movement_grid
         _last_reward
         _cum_rew
+        _oils
         _start_world
     """
 
@@ -42,6 +43,7 @@ class FieldEnv(gym.Env):
         self.max_step = 300
         self._cum_rew = 0
         self._seed = 0
+        self._oils = np.transpose(np.where(self.world == OIL))
 
         self._movement_grid = {0: [[0], [-1], [0]], 1: [[1], [0], [0]], 2: [[0], [1], [0]], 3: [[-1], [0], [0]]}
 
@@ -60,6 +62,7 @@ class FieldEnv(gym.Env):
         self.current_step = 0
         self._cum_rew = 0
         self.world = self._start_world.copy()
+        self._oils = np.transpose(np.where(self.world == OIL))
         return self._next_observation()
 
         
@@ -137,17 +140,26 @@ class FieldEnv(gym.Env):
         current_pos = np.where(self.world == [self.current_player])
         new_pos = tuple(np.array(current_pos) + self._movement_grid[action])
         if new_pos[0][0] < 0 or new_pos[0][0] >= self.size or new_pos[1][0] < 0 or new_pos[1][0] >= self.size:
-            return -50/100 # don't waste a turn
+            return -100/100 # don't waste a turn
 
         # we know it will move to new_pos now
         new_pos_value = self.world[new_pos][0]
         self.world[new_pos] = self.current_player
         self.world[current_pos] = NOTHING#WATER # can't move backwards
+        rewPart = 0
+        q1 = int(new_pos[0])
+        q2 = int(new_pos[1])
+        o1 = int(current_pos[0])
+        o2 = int(current_pos[1])
+        closestDist = np.min(np.sum(np.abs(self._oils - [q1, q2, 0]), axis=1)) # taxicab dist
+        oldClosestDist = np.min(np.sum(np.abs(self._oils - [o1, o2, 0]), axis=1)) # taxicab dist
         if new_pos_value == OIL:
-            return 100/100
+            rewPart = 65/100
+            self._oils = self._oils[~(self._oils==[q1, q2, 0]).all(axis=1)] # remove current position from oils list
         elif new_pos_value == WATER:
-            return -100/100
-        return -1/100 # go fast
+            rewPart = -35/100
+        
+        return rewPart + -(closestDist - oldClosestDist)/(closestDist + 2)-15/100 # go fast
         
     #def hasVisited(self, x, y):
         #if (self.visitField[y][x] == 1):

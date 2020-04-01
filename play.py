@@ -1,4 +1,5 @@
 import numpy as np
+import subprocess as sp
 from env.field_env import FieldEnv
 from env.world import printWorld
 
@@ -89,6 +90,7 @@ while True:
         obs, rew, done, _ = env.step(mapper[getKey()])
         step += 1
         tot += rew
+        sp.call('clear',shell=True);
         printWorld(obs)
         print(f"Reward: {rew}")
         print(f"Total Reward: {tot}")
