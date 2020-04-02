@@ -1,4 +1,8 @@
 import numpy as np
+import pandas as pd
+
+# required for rendering
+import plotly.express as px
 
 import gym
 from gym import error, spaces, utils
@@ -127,10 +131,26 @@ class OilFieldEnv(gym.Env):
         
         
     def render(self, mode='human'):
+        '''
         file = open("render.txt", "a")
         file.write(" — — — — — — — — — — — — — — — — — — — — — -\n")
         file.write(f"Episode number {self.current_episode}\n")
         file.write(f"{self.success_episode[-1]} in {self.current_step} steps\n")
         file.close()
+        '''
+        
+        data = []
+
+        for x in range(0, oilField.length):
+            for y in range(0, oilField.width):
+                for z in range(0, oilField.depth):
+                    rock = oilField.getRock(x, y, z)
+                    data.append([x, y, z, 1 - rock.getOilPercent() - rock.getWaterPercent(), rock.getOilPercent(), rock.getWaterPercent()])
+
+        df = pd.DataFrame(data, columns = ['x', 'y', 'z', 'rock %', 'oil %', 'water %'])
+        
+        new_df = df.loc[df['x'] == self.drillx]
+        fig = px.scatter_3d(new_df, x='x', y='y', z='z', color='oil %')
+        fig.show(renderer = 'browser')
         
     ##def close(self):
