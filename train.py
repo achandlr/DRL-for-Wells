@@ -4,6 +4,8 @@ import tensorflow as tf
 import numpy as np
 from stable_baselines.common.policies import FeedForwardPolicy, MlpPolicy, MlpLstmPolicy, MlpLnLstmPolicy, CnnPolicy, CnnLstmPolicy, CnnLnLstmPolicy
 from stable_baselines.common.vec_env import DummyVecEnv, SubprocVecEnv, VecNormalize
+from stable_baselines.common.callbacks import CheckpointCallback
+from CustomEvalCallback import CustomEvalCallback
 from stable_baselines.common import set_global_seeds
 from stable_baselines import ACKTR, PPO2
 from env.field_env import FieldEnv
@@ -41,13 +43,21 @@ def run():
     print("Policy = " + str(sys.argv[1]))
 
     model = PPO2(sys.argv[1], env, verbose=1, tensorboard_log="./tensey/")
+    #num_steps = int(1e7)
+    num_steps = int(1e7)
+    print("Making callbacks");
+    eval_env = DummyVecEnv([make_env(FieldEnv, i) for i in range(n_procs)])
+    if (str(sys.argv[2]) == "n"):
+        eval_env = VecNormalize(eval_env, norm_obs=True, norm_reward=False, clip_obs=10.)
+    eval_env.num_envs = 1
+    cb = [CheckpointCallback(save_freq=num_steps//(100*n_procs), save_path="./cps/", name_prefix=("fe-" + str(num_steps) + "-ppo2-" + str(sys.argv[1]) + "-" + str(sys.argv[2]))), CustomEvalCallback(eval_env, best_model_save_path="./bests/", log_path="./logs/", eval_freq=num_steps//(100*n_procs), deterministic=True, render=False)]
     print("About to start");
-    model.learn(10000000)
+    model.learn(num_steps, callback=cb)
 
 
 
     # Save the agent
-    model.save("field-env-10000000-ppo2-" + str(sys.argv[1]) + "-" + str(sys.argv[2]))
+    model.save("field-env-" + str(num_steps) + "-ppo2-" + str(sys.argv[1]) + "-" + str(sys.argv[2]))
 
 if __name__ == '__main__':
     run()
