@@ -47,7 +47,6 @@ def run():
     env.save("testing")
     #num_steps = int(1e7)
     num_steps = int(1e7)
-    num_steps = int(1e6)
     print("Making callbacks");
     eval_env = DummyVecEnv([make_env(FieldEnv, i) for i in range(n_procs)])
     if (str(sys.argv[2]) == "n"):
