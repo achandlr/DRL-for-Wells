@@ -33,7 +33,8 @@ def run():
 
     print("Setting up model")
 
-    model = PPO2.load("field-env-10000000-ppo2-MlpLnLstmPolicy.zip", seed=15346)
+    #model = PPO2.load("field-env-10000000-ppo2-MlpLnLstmPolicy.zip", seed=15346)
+    model = PPO2.load("bests/best_model.zip")
 
     obs = env.reset()
     state = None

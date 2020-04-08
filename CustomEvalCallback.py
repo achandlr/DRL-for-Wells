@@ -3,6 +3,7 @@ from abc import ABC
 import warnings
 import typing
 from typing import Union, List, Dict, Any, Optional
+import pickle
 
 import gym
 import numpy as np
@@ -33,8 +34,8 @@ def evaluate_policy(model, env, n_eval_episodes=10, deterministic=True,
     :return: (float, float) Mean reward per episode, std of reward per episode
         returns ([float], [int]) when `return_episode_rewards` is True
     """
-    if isinstance(env, VecEnv):
-        assert env.num_envs == 1, "You must pass only one environment when using this function"
+    #if isinstance(env, VecEnv):
+        #assert env.num_envs == 1, "You must pass only one environment when using this function"
 
     episode_rewards, episode_lengths = [], []
     for _ in range(n_eval_episodes):
@@ -162,6 +163,7 @@ class CustomEvalCallback(EventCallback):
                     print("New best mean reward!")
                 if self.best_model_save_path is not None:
                     self.model.save(os.path.join(self.best_model_save_path, 'best_model'))
+                    self.model.get_env().save(os.path.join(self.best_model_save_path, 'best_model_env'))
                 self.best_mean_reward = mean_reward
                 # Trigger callback if needed
                 if self.callback is not None:

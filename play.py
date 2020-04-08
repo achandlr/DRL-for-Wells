@@ -2,6 +2,7 @@ import numpy as np
 import subprocess as sp
 from env.field_env import FieldEnv
 from env.world import printWorld
+from stable_baselines.common.vec_env import DummyVecEnv, SubprocVecEnv, VecNormalize
 
 
 class _Getch:
@@ -80,18 +81,19 @@ def getKey():
 
     return k
 
+TODO: print the normalized reward to see how busted normalization is
 mapper = {"w": 3, "a": 0, "s":1, "d":2}
-env = FieldEnv()
+env = DummyVecEnv([lambda: FieldEnv()])
 while True:
     env.reset()
     tot = 0
     step = 0
     while True:
-        obs, rew, done, _ = env.step(mapper[getKey()])
+        obs, rew, done, _ = env.step([mapper[getKey()]])
         step += 1
         tot += rew
         sp.call('clear',shell=True);
-        printWorld(obs)
+        printWorld(obs[0])
         print(f"Reward: {rew}")
         print(f"Total Reward: {tot}")
         print(f"Step: {step}")

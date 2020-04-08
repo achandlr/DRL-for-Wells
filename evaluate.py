@@ -33,7 +33,7 @@ def run():
 
     print("Setting up model")
 
-    model = PPO2.load("field-env-10000000-ppo2-MlpLnLstmPolicy.zip")
+    model = PPO2.load("bests/best_model.zip")
 
     obs = env.reset()
     state = None
@@ -42,9 +42,9 @@ def run():
     #zero_completed_obs[0, :] = obs
 
     total_rew = 0;
-    for _ in range(3000):
+    for _ in range(300):
         #action, state = model.predict(zero_completed_obs, state=state)
-        action, state = model.predict(obs, state=state)
+        action, state = model.predict(obs, state=state, deterministic=True)
         obs, reward , done, _ = env.step(action)
         #zero_completed_obs[0, :] = obs
         total_rew += reward

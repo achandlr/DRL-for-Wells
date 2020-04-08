@@ -43,14 +43,16 @@ def run():
     print("Policy = " + str(sys.argv[1]))
 
     model = PPO2(sys.argv[1], env, verbose=1, tensorboard_log="./tensey/")
+    print("\n\n\n\nits a ")
+    env.save("testing")
     #num_steps = int(1e7)
     num_steps = int(1e7)
+    num_steps = int(1e6)
     print("Making callbacks");
     eval_env = DummyVecEnv([make_env(FieldEnv, i) for i in range(n_procs)])
     if (str(sys.argv[2]) == "n"):
         eval_env = VecNormalize(eval_env, norm_obs=True, norm_reward=False, clip_obs=10.)
-    eval_env.num_envs = 1
-    cb = [CheckpointCallback(save_freq=num_steps//(100*n_procs), save_path="./cps/", name_prefix=("fe-" + str(num_steps) + "-ppo2-" + str(sys.argv[1]) + "-" + str(sys.argv[2]))), CustomEvalCallback(eval_env, best_model_save_path="./bests/", log_path="./logs/", eval_freq=num_steps//(100*n_procs), deterministic=True, render=False)]
+    cb = [CheckpointCallback(save_freq=num_steps//(100*n_procs), save_path="./cps/", name_prefix=("fe-" + str(num_steps) + "-ppo2-" + str(sys.argv[1]) + "-" + str(sys.argv[2]))), CustomEvalCallback(eval_env, best_model_save_path="./bests/", log_path="./logs/", eval_freq=num_steps//(100*n_procs), deterministic=True, render=False, verbose=1)]
     print("About to start");
     model.learn(num_steps, callback=cb)
 
