@@ -102,8 +102,8 @@ PorosityFactor = 1
 def calculatePorosityFactor(porosity):
     return porosity * PorosityFactor
 
-def flowCalculation(Distance, porosityTotal,totalLiquidPercent):
-    return (1 - Distance) * (1 - porosityTotal) * totalLiquidPercent
+def flowCalculation(Distance, porosityTotal, ZDif, totalLiquidPercent):
+    return (1 - Distance) * (1 - porosityTotal) * (1 + (ZDif/5)) * totalLiquidPercent
 
 distanceLimit = 1
 porosityLimit = 1
@@ -113,13 +113,13 @@ distanceFactor = .1
 class Rock:
     
     def __init__(self, x, y, z, oilPercent, waterPercent, parentField):
-        self.x = x;
-        self.y = y;
-        self.z = z;
-        self.oilPercent = oilPercent;
-        self.waterPercent = waterPercent;
+        self.x = x
+        self.y = y
+        self.z = z
+        self.oilPercent = oilPercent
+        self.waterPercent = waterPercent
         
-        self.totalLiquidPercent = oilPercent + waterPercent;
+        self.totalLiquidPercent = oilPercent + waterPercent
         
         self.porosity = calculateInitialPorosity(oilPercent,waterPercent)
         
@@ -150,12 +150,6 @@ class Rock:
     
     def getParentField(self):
         return self.parentField
-    
-    def drawLiquid(self, ammountDrawn):
-        return 0
-    
-    def flowCalculation(self, Distance, porosityTotal):
-        return (1 - Distance) * (1 - porosityTotal) * self.totalLiquidPercent
     
     def drawLiquid(self, flowCalc):
         percentOil = 0
@@ -193,7 +187,14 @@ class Rock:
         
         ##Get self
         if (self.totalLiquidPercent > 0):
-            flowCalc = flowCalculation(Distance, porosityTotal, self.totalLiquidPercent)
+            flowCalc = 0
+
+            parentZ = Parent.getLocation()[2]
+            currentZ = self.z
+
+            Zdif = parentZ - currentZ
+            
+            flowCalc = flowCalculation(Distance, porosityTotal, Zdif, self.totalLiquidPercent)
             
             oilD, waterD = self.drawLiquid(flowCalc)
             

@@ -1,14 +1,13 @@
+import gym
 import numpy as np
 import pandas as pd
-
-# required for rendering
-import plotly.express as px
-
-import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
 
+# required for rendering
+import plotly.express as px
 from gym_oilfield.envs.OilField3D import oilField
+
 
 class OilFieldEnv(gym.Env):
     metadata = {'render.modes':['human']}
@@ -16,11 +15,18 @@ class OilFieldEnv(gym.Env):
     def __init__(self):
         ##Still need to initialize with info
         self.action_space = spaces.Discrete(6)
+
+        self.reward_range = (-1,1)
+        self.current_episode = 0
+        self.current_step = 0
+        self.max_step = 300
+        self.cum_rew = 0
+
         ##Must call initData to give full data
         print("Initialized successfully")
         print("Call initData( drillStartInfo, length, width, depth, liquidField)")
-        print("drillStartInfo - [x,y,z] of starting drill locations\n
-               liquidField - 3D numpyarray of [oil%,water%] lists")
+        print("drillStartInfo - [x,y,z] of starting drill locations") 
+        print("liquidField - 3D numpyarray of [oil%,water%] lists")
         
     
     def initData(self,drillStartInfo, length, width, depth, liquidField):
@@ -40,17 +46,21 @@ class OilFieldEnv(gym.Env):
         
         return self.getCurrentState()
         
-    def resetDrillInfo():
+    def resetDrillInfo(self):
         self.drillx = self.drillStartx
         self.drilly = self.drillStarty
         self.drillz = self.drillStartz
         
     def getCurrentState(self):
         return self.oilField.getCurrentLiquidLevels()
-    
+
+    def calculateReward(self,oilDrawn,waterDrawn):
+        return (oilDrawn - waterDrawn)
     
     ##Determine best way to transfer actions
-    actionSpace = [1,2,3,4,5,6]
+    actionSpace = {0: [0,0,-1], 1: [0,-1,0],
+                   2: [1,0,0],  3: [0,1,0],
+                   4: [-1,0,0], 5: [0,0,1]}
     
     ## Current action Space
     # 0 - move down directly
@@ -60,20 +70,13 @@ class OilFieldEnv(gym.Env):
     # 4 - move west directly
     # 5 - move up directly
     
-    
-    def getActionRequirements(self, action):
-        if (action == 0):
-            return (self.drillz + 1 < self.depth)
-        elif (action == 1):
-            return (self.drilly - 1 >= 0)
-        elif (action == 2):
-            return (self.drillx + 1 < self.length)
-        elif (action == 3):
-            return (self.drilly + 1 < self.width)
-        elif (action == 4):
-            return (self.drillx - 1 >= 0)
-        elif (action == 5):
-            return (self.drillz - 1 >= 0)
+    def getLocationVector(self):
+        return [self.drillx,self.drilly,self.drillz]
+
+    def validLocation(self,locationVector):
+        return  ((0 <= locationVector[0] and locationVector[0] < self.length ) and
+                 (0 <= locationVector[0] and locationVector[1] < self.width ) and
+                 (0 <= locationVector[2] and locationVector[2] < self.depth ))
         
     def moveDrill(self,x,y,z):
         self.drillx = x
@@ -84,50 +87,55 @@ class OilFieldEnv(gym.Env):
         
         Rock.setPorosity(0)
         
-        oilDrawn, waterDrawn = Rock.drain(0,0,None);
+        oilDrawn, waterDrawn = Rock.drain(0,0,None)
         
-        self.storedReward = calulateReward(oilDrawn, waterDrawn)
-        
-        
-    def calculateReward(self,oilDrawn,waterDrawn):
-        return (oilDrawn - waterDrawn)
+        self.storedReward = self.calculateReward(oilDrawn, waterDrawn)
+
+     
     
     def performAction(self, action):
-        if(action == actionSpace[0] and self.getActionRequirements(actionSpace[0])):
-            self.moveDrill(self.drillx,self.drilly,self.drillz - 1)
-            
-        elif (action == actionSpace[1] and self.getActionRequirements(1)):
-            self.moveDrill(self.drillx,self.drilly - 1,self.drillz)
-            
-        elif (action == actionSpace[2] and self.getActionRequirements(2)):
-            self.moveDrill(self.drillx+1,self.drilly,self.drillz)
-            
-        elif (action == actionSpace[3] and self.getActionRequirements(3)):
-            self.moveDrill(self.drillx,self.drilly+1,self.drillz)
-            
-        elif (action == actionSpace[4] and self.getActionRequirements(4)):
-            self.moveDrill(self.drillx-1,self.drilly,self.drillz)
-            
-        elif (action == actionSpace[5] and self.getActionRequirements(5)):
-            self.moveDrill(self.drillx,self.drilly,self.drillz+1)
+        currentLocation = self.getLocationVector()
+        movementVector = self.actionSpace[action]
+
+        currentLocation = np.add(currentLocation, movementVector)
+
+        if (not self.validLocation(currentLocation)): return -100/100
+
+        self.moveDrill(currentLocation[0],currentLocation[1],currentLocation[2])
             
         
         
     def step(self, action):
         
-        self.storedReward = 0;
+        self.storedReward = 0
         
-        if (not(action in actionSpace)):
+        if (not(action in self.actionSpace)):
             print("Invalid Action")
             return 0
         
         self.performAction(action)
+
+        self.cum_rew += self.storedReward
+        self.current_step += 1
+
+        done = self.current_step >= self.max_step
+
+        if done: self.current_episode += 1
         
-        return self.getCurrentState(), self.storedReward, False, {}
+        return self.getCurrentState(), self.storedReward, done, {}
         
         
     def reset(self):
+        if (self.current_episode % 1000 == 0):
+            print(f"On episode {self.current_episode}\n",flush=True)
+            print(f"Last reward: {self.cum_rew}\n", flush=True)
+            
+        self.current_step = 0
+        self.cum_rew = 0
+
         self.oilField = oilField(self.length,self.width,self.depth,self.originalField)
+
+        return self.getCurrentState()
         
         
     def render(self, mode='human'):
@@ -141,10 +149,10 @@ class OilFieldEnv(gym.Env):
         
         data = []
 
-        for x in range(0, oilField.length):
-            for y in range(0, oilField.width):
-                for z in range(0, oilField.depth):
-                    rock = oilField.getRock(x, y, z)
+        for x in range(0, self.oilField.length):
+            for y in range(0, self.oilField.width):
+                for z in range(0, self.oilField.depth):
+                    rock = self.oilField.getRock(x, y, z)
                     data.append([x, y, z, 1 - rock.getOilPercent() - rock.getWaterPercent(), rock.getOilPercent(), rock.getWaterPercent()])
 
         df = pd.DataFrame(data, columns = ['x', 'y', 'z', 'rock %', 'oil %', 'water %'])
