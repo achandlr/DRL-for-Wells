@@ -1,5 +1,5 @@
 #!/bin/bash
 
-conda install --yes --file ml.yml
-conda install --yes --file mlcpu.yml
+conda env create --file ml.yml
+conda env create --file mlcpu.yml
 

@@ -4,8 +4,7 @@ import tensorflow as tf
 import numpy as np
 import subprocess as sp
 from stable_baselines.common.policies import FeedForwardPolicy, MlpPolicy, MlpLstmPolicy, MlpLnLstmPolicy, CnnPolicy, CnnLstmPolicy, CnnLnLstmPolicy
-from stable_baselines.common.vec_env import DummyVecEnv, SubprocVecEnv, VecNormalize#, VecVideoRecorder
-from vec_video_recorder import VecVideoRecorder
+from stable_baselines.common.vec_env import DummyVecEnv, SubprocVecEnv, VecNormalize, VecVideoRecorder
 from stable_baselines.common import set_global_seeds
 from stable_baselines import ACKTR, PPO2
 from env.field_env import FieldEnv
