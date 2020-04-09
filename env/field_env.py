@@ -10,7 +10,7 @@ from .world import NOTHING, PLAYER, OIL, WATER, WALL
 
 
 class FieldEnv(gym.Env):
-    #metadata = {'render.modes': ['human']}
+    metadata = {'render.modes': ['human', 'rgb_array']}
     
     """
     Variables:
@@ -185,7 +185,7 @@ class FieldEnv(gym.Env):
             if (self._seed == 1):
                 printWorld(self.world)
         else:
-            return np.repeat(self.world, 3, axis=-1).astype(dtype=np.uint8)
+            return np.repeat((self.world+1)*127, 3, axis=-1).astype(dtype=np.uint8)
         """
         file = open("render.txt", "a")
         file.write(" — — — — — — — — — — — — — — — — — — — — — -\n")

@@ -4,7 +4,7 @@ import tensorflow as tf
 import numpy as np
 import subprocess as sp
 from stable_baselines.common.policies import FeedForwardPolicy, MlpPolicy, MlpLstmPolicy, MlpLnLstmPolicy, CnnPolicy, CnnLstmPolicy, CnnLnLstmPolicy
-from stable_baselines.common.vec_env import DummyVecEnv, SubprocVecEnv
+from stable_baselines.common.vec_env import DummyVecEnv, SubprocVecEnv, VecNormalize
 from stable_baselines.common import set_global_seeds
 from stable_baselines import ACKTR, PPO2
 from env.field_env import FieldEnv
@@ -30,6 +30,7 @@ def run():
 
     n_procs = 8
     env = DummyVecEnv([make_env(FieldEnv, i+1) for i in range(1)])
+    env = VecNormalize.load("bests/best_model_env", env)
 
     print("Setting up model")
 
@@ -43,7 +44,7 @@ def run():
     zero_completed_obs[0, :] = obs
 
     rew = 0
-    for _ in range(1000):
+    for _ in range(300):
         action, state = model.predict(zero_completed_obs, state=state)
         obs, reward , done, _ = env.step(action)
         zero_completed_obs[0, :] = obs
