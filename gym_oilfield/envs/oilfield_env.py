@@ -63,19 +63,19 @@ class OilFieldEnv(gym.Env):
                    4: [-1,0,0], 5: [0,0,1]}
     
     ## Current action Space
-    # 0 - move down directly
+    # 0 - move up directly
     # 1 - move north directly
     # 2 - move east directly
     # 3 - move south directly
     # 4 - move west directly
-    # 5 - move up directly
+    # 5 - move down directly
     
     def getLocationVector(self):
         return [self.drillx,self.drilly,self.drillz]
 
     def validLocation(self,locationVector):
         return  ((0 <= locationVector[0] and locationVector[0] < self.length ) and
-                 (0 <= locationVector[0] and locationVector[1] < self.width ) and
+                 (0 <= locationVector[1] and locationVector[1] < self.width ) and
                  (0 <= locationVector[2] and locationVector[2] < self.depth ))
         
     def moveDrill(self,x,y,z):
@@ -87,7 +87,9 @@ class OilFieldEnv(gym.Env):
         
         Rock.setPorosity(0)
         
-        oilDrawn, waterDrawn = Rock.drain(0,0,None)
+        emptyList = []
+
+        oilDrawn, waterDrawn = Rock.drain(0,0,None, emptyList)
         
         self.storedReward = self.calculateReward(oilDrawn, waterDrawn)
 
@@ -134,6 +136,8 @@ class OilFieldEnv(gym.Env):
         self.cum_rew = 0
 
         self.oilField = oilField(self.length,self.width,self.depth,self.originalField)
+
+        self.resetDrillInfo()
 
         return self.getCurrentState()
         

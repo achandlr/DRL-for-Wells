@@ -45,7 +45,6 @@ class oilField():
         return liquidField
     
     def __str__(self):
-        currentLiquidField = self.getCurrentLiquidLevels()
         
         returnString = ""
         
@@ -83,9 +82,9 @@ class oilField():
         ]
         
         for offset in neighborOffsets:
-            ndepth = offset[0]
-            nwidth = offset[1]
-            nlength = offset[2]
+            ndepth = z + offset[0]
+            nwidth =  y + offset[1]
+            nlength = x + offset[2]
             
             if ( ndepth >= 0 and ndepth < self.depth and nwidth >= 0 and nwidth < self.width and
                  nlength >= 0 and nlength < self.length):
@@ -99,15 +98,16 @@ def calculateInitialPorosity(oilPercent, waterPercent):
     
     
 PorosityFactor = 1
-def calculatePorosityFactor(porosity):
+
+def incimentPorosityFactor(porosity):
     return porosity * PorosityFactor
 
-def flowCalculation(Distance, porosityTotal, ZDif, totalLiquidPercent):
-    return (1 - Distance) * (1 - porosityTotal) * (1 + (ZDif/5)) * totalLiquidPercent
+def drawCalculation(porosity, distance, zFactor):
+    return (1 - distance) * (1 - porosity) * (1 + (zFactor/100)) 
 
-distanceLimit = 1
-porosityLimit = 1
-    
+distanceLimit = 2
+porosityLimit = 2
+
 distanceFactor = .1
 
 class Rock:
@@ -119,8 +119,6 @@ class Rock:
         self.oilPercent = oilPercent
         self.waterPercent = waterPercent
         
-        self.totalLiquidPercent = oilPercent + waterPercent
-        
         self.porosity = calculateInitialPorosity(oilPercent,waterPercent)
         
         self.parentField = parentField
@@ -130,6 +128,9 @@ class Rock:
     
     def getWaterPercent(self):
         return self.waterPercent
+
+    def getPorosity(self):
+        return self.porosity
     
     def updateLiquid(self, newOil, newWater):
         self.oilPercent = newOil
@@ -139,73 +140,81 @@ class Rock:
         coordinates = [self.x, self.y, self.z]
         return coordinates
     
-    def getTotalLiquidPercent(self):
-        return self.totalLiquidPercent
-    
-    def getPorosity(self):
-        return self.porosity
-    
     def setPorosity(self, newPorosity):
         self.porosity = newPorosity
     
     def getParentField(self):
         return self.parentField
     
-    def drawLiquid(self, flowCalc):
-        percentOil = 0
-        if (self.oilPercent > 0):
-            percentOil = self.oilPercent/self.totalLiquidPercent
-            
-        percentWater = 0
-        if (self.waterPercent > 0):
-            percentWater = self.waterPercent/self.totalLiquidPercent
-            
-        intendDrawOil = percentOil * flowCalc
-        intendDrawWater = percentWater * flowCalc
+
+    def drawLiquid(self, drawAmmount):
+
+        if (drawAmmount > (self.oilPercent + self.waterPercent)):
+            dOil = self.oilPercent
+            dWat = self.waterPercent
+
+            self.updateLiquid(0,0)
+            return dOil,dWat
+
+        dOil = 0
+        dWat = 0
         
-        if (intendDrawOil > self.oilPercent):
-            intendDrawOil = self.oilPercent
-        if (intendDrawWater > self.waterPercent):
-            intendDrawWater = self.waterPercent
-            
-        self.oilPercent = max(0, self.oilPercent - intendDrawOil)
-        self.waterPercent = max(0, self.waterPercent - intendDrawWater)
-        
-        self.totalLiquidPercent = self.oilPercent + self.waterPercent
-        
-        return intendDrawOil,intendDrawWater
+        drawAmmount = drawAmmount/2
+
+        if (drawAmmount > self.waterPercent):
+            dWat = self.waterPercent
+            self.updateLiquid(self.oilPercent,0)
+        else :
+            dWat = drawAmmount
+            self.updateLiquid(self.oilPercent, self.waterPercent - drawAmmount)
+
+        if (drawAmmount > self.oilPercent):
+            dOil = self.oilPercent
+            self.updateLiquid(0,self.waterPercent)
+        else:
+            dOil = drawAmmount
+            self.updateLiquid(self.oilPercent - drawAmmount, self.waterPercent)
+
+        return dOil,dWat
+
     
-    def drain(self, porosityTotal, Distance, Parent):
+    def drain(self, cummulativePorosity, cummulativeDistance, Parent, drainList):
+
+
+        cummulativePorosity += incimentPorosityFactor(self.porosity)
         
-        porosityTotal += calculatePorosityFactor(self.porosity)
-        
-        if (Distance >= distanceLimit or porosityTotal >= porosityLimit):
+        if (cummulativeDistance >= distanceLimit or cummulativePorosity >= porosityLimit):
             return 0,0
-        
+
         oilDrawn = 0
         waterDrawn = 0
-        
-        ##Get self
-        if (self.totalLiquidPercent > 0):
-            flowCalc = 0
 
-            parentZ = Parent.getLocation()[2]
-            currentZ = self.z
+        ##Self
 
-            Zdif = parentZ - currentZ
-            
-            flowCalc = flowCalculation(Distance, porosityTotal, Zdif, self.totalLiquidPercent)
-            
-            oilD, waterD = self.drawLiquid(flowCalc)
-            
+        if (self.oilPercent > 0 or self.waterPercent > 0):
+
+            drawAmmount = 0
+
+            zFactor = 0
+
+            if (Parent != None):
+                zFactor = (Parent.z - self.z)
+
+            drawAmmount = drawCalculation(cummulativePorosity, cummulativeDistance, zFactor)
+
+            oilD, waterD = self.drawLiquid(drawAmmount)
+
             oilDrawn += oilD
             waterDrawn += waterD
-        
-        ##Get Neighbors
+
+        drainList.append(self)
+
+
+        ##Neighbors
         
         for Rock in self.parentField.getRockNeighbors(self.x,self.y,self.z):
-            if (not(Rock is Parent)):
-                childOil, childWater = Rock.drain(porosityTotal, Distance + distanceFactor, self)
+            if (not(Rock in drainList)):
+                childOil, childWater = Rock.drain(cummulativePorosity, cummulativeDistance + distanceFactor, self, drainList)
                 oilDrawn += childOil
                 waterDrawn += childWater
                 
