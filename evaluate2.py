@@ -23,8 +23,8 @@ def make_env(env_class, rank, seed=0):
 n_procs=8
 eval_env = DummyVecEnv([make_env(FieldEnv, i) for i in range(n_procs)])
 #eval_env = VecNormalize(eval_env, norm_obs=True, norm_reward=False, clip_obs=10.)
-eval_env = VecNormalize.load("bests/best_model_env", eval_env)
-model = PPO2.load("bests/best_model.zip")
+eval_env = VecNormalize.load("agent/results/FieldEnv-PPO2-MlpLnLstmPolicy-8-4-10000-49.env", eval_env)
+model = PPO2.load("agent/results/FieldEnv-PPO2-MlpLnLstmPolicy-8-4-10000-49.zip")
 n_eval_episodes=5
 render = False;
 deterministic=True;
