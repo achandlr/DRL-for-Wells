@@ -1,7 +1,8 @@
 import sys
 from stable_baselines.common.vec_env import DummyVecEnv, SubprocVecEnv, VecNormalize
 from stable_baselines.common import set_global_seeds
-from env.field_env import FieldEnv
+from gym_oilfield.oilfield_env import OilFieldEnv
+from gym_oilfield.readData import readData
 from model import Model
 
 def make_env(env_class, rank, seed=0):
@@ -14,16 +15,18 @@ def make_env(env_class, rank, seed=0):
     """
     def _init():
         env = env_class()
+        env.initData([0,0,0],11,11,11, readData(11))
         # Important: use a different seed for each environment
         env.seed(seed + rank)
         return env
     set_global_seeds(seed)
     return _init
 
-ENV = FieldEnv
+ENV = OilFieldEnv
+ENV_NAME = "OilFieldEnv"
 SEED = 49
 N_PROCS = 8
-NUM_STEPS = int(1e4)
+NUM_STEPS = int(1e6)
 
 def run():
     resume = sys.argv[1] == "r" if len(sys.argv) > 1 else False
@@ -39,9 +42,9 @@ def run():
 
     if not (resume or evaluate):
         env = VecNormalize(env, norm_obs=True, norm_reward=False, clip_obs=10.)
-        model = Model(env=env, eval_env=eval_env, env_name="FieldEnv", seed=SEED, n_procs=N_PROCS, num_steps=NUM_STEPS)
+        model = Model(env=env, eval_env=eval_env, env_name=ENV_NAME, seed=SEED, n_procs=N_PROCS, num_steps=NUM_STEPS)
     else:
-        model = Model.load(loadpath, env, eval_env=eval_env, env_name="FieldEnv", seed=SEED, n_procs=N_PROCS, num_steps=NUM_STEPS)
+        model = Model.load(loadpath, env, eval_env=eval_env, env_name=ENV_NAME, seed=SEED, n_procs=N_PROCS, num_steps=NUM_STEPS)
         #model = Model(env=None, eval_env=eval_env, env_name="FieldEnv", seed=SEED, n_procs=N_PROCS, num_steps=NUM_STEPS)
 
 
