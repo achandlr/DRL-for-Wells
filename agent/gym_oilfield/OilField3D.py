@@ -186,8 +186,8 @@ class Rock:
 
         cummulativePorosity += incimentPorosityFactor(self.porosity)
 		
-		if (cummulativeDistance >= distanceLimit or cummulativePorosity >= porosityLimit):
-			return 0,0
+	if (cummulativeDistance >= distanceLimit or cummulativePorosity >= porosityLimit):
+		return 0,0
 
         oilDrawn = 0
         waterDrawn = 0
