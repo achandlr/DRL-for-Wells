@@ -21,6 +21,7 @@ class OilFieldEnv(gym.Env):
         self.current_step = 0
         self.max_step = 300
         self.cum_rew = 0
+        self.render_num = 0
 
         ##Must call initData to give full data
         print("Initialized successfully")
@@ -166,5 +167,6 @@ class OilFieldEnv(gym.Env):
         new_df = df.loc[df['x'] == self.drillx]
         fig = px.scatter_3d(new_df, x='x', y='y', z='z', color='oil %')
         fig.show(renderer = 'browser')
+        fig.write_image("images/fig" + str(render_num) + ".png");
         
     ##def close(self):
