@@ -18,7 +18,7 @@ class oilField():
                 for x in range(0, length):
                     oilPercent = liquidField[z][y][x][0]
                     waterPercent = liquidField[z][y][x][1]
-                    porosity = liquidField[z][y][x][2]
+                    porosity = max(1-oilPercent-waterPercent, 0)
                     newRock = Rock(x,y,z,oilPercent,waterPercent,porosity,self)
                     
                     rockField[z][y][x] = newRock
@@ -95,7 +95,7 @@ class oilField():
         
         
 def calculateInitialPorosity(oilPercent, waterPercent):
-        return 1 - (oilPercent + waterPercent)
+        return max(0, 1 - (oilPercent + waterPercent))
     
     
 PorosityFactor = 1
@@ -104,7 +104,7 @@ def incimentPorosityFactor(porosity):
     return porosity * PorosityFactor
 
 def drawCalculation(porosity, distance, zFactor):
-    return (1 - distance) * (1 - porosity) * (1 + (zFactor/100)) 
+    return max((1 - (distance/distanceLimit)) * (1 - (porosity/porosityLimit)) * (1 + (zFactor/100)),0)
 
 distanceLimit = 2
 porosityLimit = 2
@@ -137,6 +137,7 @@ class Rock:
     def updateLiquid(self, newOil, newWater):
         self.oilPercent = newOil
         self.waterPercent = newWater
+            
     
     def getLocation(self):
         coordinates = [self.x, self.y, self.z]
@@ -184,9 +185,6 @@ class Rock:
 
 
         cummulativePorosity += incimentPorosityFactor(self.porosity)
-        
-        if (cummulativeDistance >= distanceLimit or cummulativePorosity >= porosityLimit):
-            return 0,0
 
         oilDrawn = 0
         waterDrawn = 0
@@ -203,7 +201,7 @@ class Rock:
                 zFactor = (Parent.z - self.z)
 
             drawAmmount = drawCalculation(cummulativePorosity, cummulativeDistance, zFactor)
-
+            
             oilD, waterD = self.drawLiquid(drawAmmount)
 
             oilDrawn += oilD
