@@ -31,7 +31,7 @@ class OilFieldEnv(gym.Env):
         
     
     def initData(self,drillStartInfo, length, width, depth, liquidField):
-        self.observation_space = spaces.Box(low=-1, high=2, shape=(length, width, depth, 2), dtype=np.float64)
+        self.observation_space = spaces.Box(low=0, high=1, shape=(length, width, depth, 2), dtype=np.float64)
 
         self.oilField = oilField(length, width, depth, liquidField)
         
@@ -166,7 +166,8 @@ class OilFieldEnv(gym.Env):
         
         new_df = df.loc[df['x'] == self.drillx]
         fig = px.scatter_3d(new_df, x='x', y='y', z='z', color='oil %')
-        fig.show(renderer = 'browser')
-        fig.write_image("images/fig" + str(render_num) + ".png");
+        #fig.show(renderer = 'browser')
+        fig.write_image("images/fig" + str(self.render_num) + ".png");
+        self.render_num+=1
         
     ##def close(self):

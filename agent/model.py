@@ -43,10 +43,10 @@ class Model(ALGO):
         cb = [cps, bestcb]
         super().learn(self.num_steps, callback=cb, reset_num_timesteps=not self.loaded)
         self.save("./results/")
-    def evaluate(self):
+    def evaluate(self, visualize):
         episode_rewards, episode_lengths = evaluate_policy(self, self.eval_env,
 					       n_eval_episodes=N_EVAL_EPISODES,
-					       render=False,
+					       render=visualize,
 					       deterministic=True,
 					       return_episode_rewards=True)
         print(episode_rewards)

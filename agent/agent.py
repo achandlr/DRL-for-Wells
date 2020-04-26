@@ -29,8 +29,9 @@ N_PROCS = 8
 NUM_STEPS = int(1e6)
 
 def run():
+    visualize = sys.argv[1] == "v" if len(sys.argv) > 1 else False
     resume = sys.argv[1] == "r" if len(sys.argv) > 1 else False
-    evaluate = sys.argv[1] == "e" if len(sys.argv) > 1 else False
+    evaluate = visualize or (sys.argv[1] == "e" if len(sys.argv) > 1 else False)
     loadpath = sys.argv[2] if resume or evaluate else ""
     print("Setting up env")
     env = SubprocVecEnv([make_env(ENV, i) for i in range(N_PROCS)], start_method='spawn')
@@ -51,7 +52,7 @@ def run():
     if not evaluate:
         model.trainAndSave()
     else:
-        model.evaluate()
+        model.evaluate(visualize)
 
 if __name__ == '__main__':
     run()
