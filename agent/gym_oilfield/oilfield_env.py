@@ -145,7 +145,7 @@ class OilFieldEnv(gym.Env):
         return self.getCurrentState()
         
         
-    def render(self, mode='human'):
+    def render_test(self, mode='human'):
         '''
         file = open("render.txt", "a")
         file.write(" — — — — — — — — — — — — — — — — — — — — — -\n")
@@ -164,10 +164,32 @@ class OilFieldEnv(gym.Env):
 
         df = pd.DataFrame(data, columns = ['x', 'y', 'z', 'rock %', 'oil %', 'water %'])
         
-        new_df = df.loc[df['x'] == self.drillx]
-        fig = px.scatter_3d(new_df, x='x', y='y', z='z', color='oil %')
-        #fig.show(renderer = 'browser')
-        fig.write_image("images/fig" + str(self.render_num) + ".png");
+        x_cross = df.loc[df['x'] == self.drillx]
+        x_fig = px.scatter_3d(x_cross, x='x', y='y', z='z', color='oil %')
+        x_fig.update_layout(
+            width = 800,
+            height = 750,
+            scene = dict(
+            xaxis = dict(nticks=11, range = [-0.5, 10.5],),
+            yaxis = dict(nticks=11, range = [-0.5, 10.5],),
+            zaxis = dict(nticks=11, range = [-0.5, 10.5],),
+        ))
+        
+        z_cross = df.loc[df['z'] == self.drillz]
+        z_fig = px.scatter_3d(z_cross, x='x', y='y', z='z', color='oil %')
+        z_fig.update_layout(
+            width = 800,
+            height = 750,
+            scene = dict(
+            xaxis = dict(nticks=11, range = [-0.5, 10.5],),
+            yaxis = dict(nticks=11, range = [-0.5, 10.5],),
+            zaxis = dict(nticks=11, range = [-0.5, 10.5],),
+        ))
+        
+        if (self.render_num < 299) :
+            x_fig.write_image("images/x_fig" + str(self.render_num) + ".png")
+            z_fig.write_image("images/z_fig" + str(self.render_num) + ".png")
+            print("rendered " + str(self.render_num))
         self.render_num+=1
         
     ##def close(self):

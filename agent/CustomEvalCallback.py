@@ -52,7 +52,7 @@ def evaluate_policy(model, env, n_eval_episodes=10, deterministic=True,
                 callback(locals(), globals())
             episode_length += 1
             if render:
-                env.render()
+                env.env_method('render_test', [0])
         episode_rewards.append(episode_reward)
         episode_lengths.append(episode_length)
 
