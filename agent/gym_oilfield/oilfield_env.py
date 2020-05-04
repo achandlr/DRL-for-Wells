@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from gym import error, spaces, utils
 from gym.utils import seeding
+from .centering import center
 
 # required for rendering
 import plotly.express as px
@@ -55,7 +56,7 @@ class OilFieldEnv(gym.Env):
         self.drillz = self.drillStartz
         
     def getCurrentState(self):
-        return self.oilField.getCurrentLiquidLevels()
+        return center(self.oilField.getCurrentLiquidLevels(), self.drillx, self.drilly, self.drillz, self.length)
 
     def calculateReward(self,oilDrawn,waterDrawn):
         return (oilDrawn - waterDrawn)
@@ -154,6 +155,7 @@ class OilFieldEnv(gym.Env):
         file.close()
         '''
         
+        if (seed != 1) return
         data = []
 
         for x in range(0, self.oilField.length):
@@ -171,3 +173,6 @@ class OilFieldEnv(gym.Env):
         self.render_num+=1
         
     ##def close(self):
+    def seed(self, seed):
+        self._seed = seed;
+

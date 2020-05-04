@@ -24,7 +24,7 @@ def make_env(env_class, rank, seed=0):
 
 ENV = OilFieldEnv
 ENV_NAME = "OilFieldEnv"
-SEED = 49
+SEED = 510
 N_PROCS = 8
 NUM_STEPS = int(1e6)
 
