@@ -12,6 +12,12 @@ CP_COUNT = 100
 NMINIBATCHES = 4
 N_EVAL_EPISODES = 5
 
+"""
+Class makes a tensorboard output of performance
+
+"""
+
+
 class Model(ALGO):
     def __init__(self, env, eval_env, env_name, seed, n_procs, num_steps):
         super().__init__(POLICY, env, verbose=1, tensorboard_log="./tensorboard/", seed=seed, nminibatches=NMINIBATCHES)
@@ -53,4 +59,3 @@ class Model(ALGO):
 
     def getName(self):
         return "-".join(list(map(str,filter(None.__ne__, [self.env_name, ALGO_STR, POLICY_STR, self.n_procs, NMINIBATCHES, self.num_steps, self.seed, "resume" if self.loaded else None]))))
-

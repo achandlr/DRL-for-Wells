@@ -11,27 +11,44 @@ from .world import NOTHING, PLAYER, OIL, WATER, WALL
 
 class FieldEnv(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}
-    
+
     """
+
+    Represents an oil field environment
+
     Variables:
         action_space
+            --Discrete variable which can take one of four options at a time
         observation_space
+            --A box with identical bounds in each dimension
         size
+            --Size of the start world
         reward_range
+            --Descibes the potential range of a given reward
         current_episode
+            --Store what episode the agent is on
         current_player
-        current_step
-        max_step
+            --Stores a value describing the current agent/player
+        current_step (int)
+            --Stores what step in the episode the agent is on
+        max_step (int)
+            --Stores the limit for how many steps per episode
         world
+            --A copy of the current world
         _movement_grid
+            --Options that describe how the agent can move through the env
         _last_reward
+            --Stores the last reward the agent collected
         _cum_rew
+            --Stores the cumulative rewards the agent has acquired
         _oils
+            --Stores the position of all the oil in the world
         _start_world
+            --The world filled with initial values representing oil, water, empty
     """
 
     def __init__(self):
-        
+
         self.action_space = spaces.Discrete(4)
         self._start_world = parseWorld()
         self.world = self._start_world.copy()
@@ -51,6 +68,10 @@ class FieldEnv(gym.Env):
 
 
     def reset(self):
+        """
+        Function that resets the episode and brings everything back to its
+        original state
+        """
         #print("Reseting")
         #print(f"Episode number {self.current_episode}")
         #print(f" in {self.current_step} steps\n")
@@ -65,7 +86,7 @@ class FieldEnv(gym.Env):
         self._oils = np.transpose(np.where(self.world == OIL))
         return self._next_observation()
 
-        
+
         #FieldInput = [ [[.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1]],
                        #[[.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1]],
                        #[[.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1]],
@@ -76,7 +97,7 @@ class FieldEnv(gym.Env):
                        #[[.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1]],
                        #[[.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1]],
                        #[[.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1], [.8,.1]] ]
-        
+
         #self.visitField = [ [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                            #[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                            #[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -87,24 +108,28 @@ class FieldEnv(gym.Env):
                            #[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                            #[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                            #[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] ]
-        
+
         #self.Field = Field(FieldInput)
 
         #self.currentX = 0
         #self.currentY = 5
         #self.visitField[5][0] = 1
-        
+
         #StartOil , startWater = self.Field.getRock(0,5).Drain(0,0,None)
-        
+
         #self.totalOil = 0
         #self.totalOil += StartOil
-        
+
         #self.totalWater = 0
         #self.totalWater += startWater
-        
+
         #return self.Field.getLiquidField()
 
     def shift1(self, arr, num, fill_value=np.nan):
+        """
+        TODO
+        """
+
         result = np.empty_like(arr)
         if num > 0:
             result[:num] = fill_value
@@ -118,6 +143,14 @@ class FieldEnv(gym.Env):
 
 
     def shift2(self, arr, num, fill_value=np.nan):
+        """
+        TODO
+
+        Parameters:
+            arr (TODO) : TODO
+            num (TODO) : TODO
+            fill_value (TODO) : TODO
+        """
         result = np.empty_like(arr)
         if num > 0:
             result[:,:num] = fill_value
@@ -130,6 +163,11 @@ class FieldEnv(gym.Env):
         return result
 
     def _next_observation(self):
+        """
+        Updates the observation space based off the agent's movement
+
+        Returns the new observation space
+        """
         current_pos = np.where(self.world == [self.current_player])
         obs = self.shift2(self.shift1(self.world, self.size//2 - current_pos[0][0], WALL), self.size//2 - current_pos[1][0], WALL);
         #obs = np.append(obs, [[self.current_player, 0, 0, 0, 0, 0, 0, 0, 0]], axis=0)
@@ -137,6 +175,17 @@ class FieldEnv(gym.Env):
 
     # returns a reward
     def _take_action(self, action):
+        """
+
+        Parameters:
+            -action (TODO): the action that the agent wants to _take_action
+
+        Moves the agent in the desired direction (based off action param) and
+        calculates the reward based off that movement
+
+        Return: the reward for the action
+        """
+
         current_pos = np.where(self.world == [self.current_player])
         new_pos = tuple(np.array(current_pos) + self._movement_grid[action])
         if new_pos[0][0] < 0 or new_pos[0][0] >= self.size or new_pos[1][0] < 0 or new_pos[1][0] >= self.size:
@@ -158,29 +207,49 @@ class FieldEnv(gym.Env):
             self._oils = self._oils[~(self._oils==[q1, q2, 0]).all(axis=1)] # remove current position from oils list
         elif new_pos_value == WATER:
             rewPart = -35/100
-        
+
         return rewPart + -(closestDist - oldClosestDist)/(closestDist + 2)-15/100 # go fast
-        
+
     #def hasVisited(self, x, y):
         #if (self.visitField[y][x] == 1):
             #return True
         #else :
             #return False
-    
+
     def step(self, action):
+        """
+
+        Parameter:
+            action (TODO) - the action the agent performs during this step
+
+
+        Tells the agent to actually take the action and increments values as a
+        result of the step
+
+        Return: A tuple containing the next observation, reward of the last
+        action, and whether or not the episode is done
+        """
         if (action < 0 or action >= 4):
             print("Invalid Action")
             return 0
-        
+
         self._last_reward = self._take_action(action)
         self._cum_rew += self._last_reward
         self.current_step += 1
         done = self.current_step >= self.max_step
         if done: self.current_episode += 1
         return self._next_observation(), self._last_reward, done, {}
-    
-   
+
+
     def render(self, mode='human'):
+        """
+        (TODO confirm w Victor or Matthew)
+        Renders the environment for visualization purposes
+
+        Parameters:
+            mode (str) : TOOD
+        """
+
         if (mode is 'human'):
             if (self._seed == 1):
                 printWorld(self.world)
@@ -198,9 +267,7 @@ class FieldEnv(gym.Env):
         file.close()
         """
 
-    
+
     ##def close(self):
     def seed(self, seed):
         self._seed = seed;
-    
-    

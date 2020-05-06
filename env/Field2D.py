@@ -5,6 +5,14 @@ porosityFactor = 1
 
 class Field:
 
+    """
+    A 2d representation of a two-dimension well field
+
+    TODO Give a better classification of what each method does
+
+    """
+
+
     ## Initalizes Field class from list of liquid quantities
     def __init__(self, liquidField):
 
@@ -15,7 +23,7 @@ class Field:
             currentRow = []
 
             liquidRow = liquidField[row]
-            
+
             for column in range(0, len(liquidRow)):
                 currentRockLiquid = liquidField[row][column]
 
@@ -33,21 +41,21 @@ class Field:
 
     def getLiquidField(self):
         liquidField = []
-        
+
         rockField = self.field
-        
+
         for row in rockField:
             for Rock in row:
                 x = Rock.getX()
                 y = Rock.getY()
                 Oil = Rock.getOil()
                 Water = Rock.getWater()
-                
+
                 liquidField.append([x,y,Oil,Water])
-        
+
         return liquidField
-                
-    
+
+
     def printField(self):
 
         for row in self.field:
@@ -79,6 +87,14 @@ class Field:
 
 
 class Rock:
+
+    """
+    Represents rocks and their properties
+
+    Has methods that give a rock's property and how it will act when drilled
+
+    TODO: Give better descriptions at what each method does
+    """
 
     ## Initializes rock
     def __init__(self, x, y, oil, water, Field):

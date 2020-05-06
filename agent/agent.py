@@ -28,6 +28,7 @@ SEED = 510
 N_PROCS = 8
 NUM_STEPS = int(1e6)
 
+##begin training
 def run():
     visualize = sys.argv[1] == "v" if len(sys.argv) > 1 else False
     resume = sys.argv[1] == "r" if len(sys.argv) > 1 else False
@@ -56,4 +57,3 @@ def run():
 
 if __name__ == '__main__':
     run()
-
