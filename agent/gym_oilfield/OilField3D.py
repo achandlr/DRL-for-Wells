@@ -48,8 +48,11 @@ class oilField():
     def getRock(self,x,y,z):
         return self.rockField[z][y][x]
 
-    ##Creates and returns a list holding th values for oil and water at every
-    ##position in the oil field
+    """
+        Creates and returns a list holding th values for oil and water at every
+        position in the oil field
+
+    """
     def getCurrentLiquidLevels(self):
         liquidField = np.empty([self.depth,self.length,self.width,2], dtype = np.float64)
 
@@ -68,7 +71,10 @@ class oilField():
 
         return liquidField
 
-    ##Prints out the liquid values at each position in the oil field
+    """
+        Prints out the liquid values at each position in the oil field
+    
+    """
     def __str__(self):
 
         returnString = ""
@@ -97,7 +103,7 @@ class oilField():
     """
     Returns list of SINGLE-STEP neighbors
 
-    Paraneters:
+    Parameters:
         x (int) - x position of a rock object
         y (int) - y position of a rock object
         z (int) - z position of a rock object
@@ -124,178 +130,206 @@ class oilField():
 
         return returnList
 
-##Calculates initial porosity value
-def calculateInitialPorosity(oilPercent, waterPercent):
+    """
+        Calculates initial porosity value
+
+    """
+    def calculateInitialPorosity(oilPercent, waterPercent):
         return max(0, 1 - (oilPercent + waterPercent))
 
-PorosityFactor = 1
-
-##TODO ASK VICTOR
-##porosity (float) - the porosity of a rock
-def incimentPorosityFactor(porosity):
-    return porosity * PorosityFactor
-
-"""
-Calculates how much liquid can be drawn based off the distance from the drill
-and the amount in the rock
-
-Parameters:
-    porosity (float) : indicates the amount of porosity in a rock object
-    distance (float) : the distance the current rock is from the drill
-    zFactor (TODO) : TODO - Ask VICTOR
-"""
-def drawCalculation(porosity, distance, zFactor):
-    return max((1 - (distance/distanceLimit)) * (1 - (porosity/porosityLimit)) * (1 + (zFactor/100)),0)
-
-distanceLimit = 2
-porosityLimit = 2
-
-distanceFactor = .1
-
-class Rock:
+    PorosityFactor = 1
 
     """
+        Determines by how much the porosity should be affected
+        by a constant porosity factor
+        
+        Parameters:
+            porosity (float) - the porosity of a rock
 
-    Class stores the properties of a rock object within an oil field
+    """
+    def incimentPorosityFactor(porosity):
+        return porosity * PorosityFactor
 
+    """
+    Calculates how much liquid can be drawn based off the distance from the drill
+    and the amount in the rock
+    
     Parameters:
-        x (int) : the x-positon of the rock in the oil field
-        y (int) : the y-position of the rock in the oil field
-        z (int) : the z-position of the rock in the oil field
-        oilPercent (float) : the amount of oil in a rock as a percentage
-        waterPercent (float) : the amount of water in a rock as a percentage
-        porosity (float) : the porosity of a rock object
-
-
+        porosity (float) : indicates the amount of porosity in a rock object
+        distance (float) : the distance the current rock is from the drill
+        zFactor (TODO) : TODO - Ask VICTOR
     """
+    def drawCalculation(porosity, distance, zFactor):
+        return max((1 - (distance/distanceLimit)) * (1 - (porosity/porosityLimit)) * (1 + (zFactor/100)),0)
 
-    def __init__(self, x, y, z, oilPercent, waterPercent, porosity, parentField):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.oilPercent = oilPercent
-        self.waterPercent = waterPercent
+    distanceLimit = 2
+    porosityLimit = 2
 
-        #self.porosity = calculateInitialPorosity(oilPercent,waterPercent)
-        self.porosity = porosity
+    distanceFactor = .1
 
-        self.parentField = parentField
+    class Rock:
 
-    ##Returns the oil percentage of a rock object
-    def getOilPercent(self):
-        return self.oilPercent
+        """
+        Class stores the properties of a rock object within an oil field
 
-    ##Returns the water percentage of a rockField object
-    def getWaterPercent(self):
-        return self.waterPercent
+        Parameters:
+            x (int) : the x-positon of the rock in the oil field
+            y (int) : the y-position of the rock in the oil field
+            z (int) : the z-position of the rock in the oil field
+            oilPercent (float) : the amount of oil in a rock as a percentage
+            waterPercent (float) : the amount of water in a rock as a percentage
+            porosity (float) : the porosity of a rock object
 
-    ##Returns the porosity of a rock object
-    def getPorosity(self):
-        return self.porosity
+        """
+        def __init__(self, x, y, z, oilPercent, waterPercent, porosity, parentField):
+            self.x = x
+            self.y = y
+            self.z = z
+            self.oilPercent = oilPercent
+            self.waterPercent = waterPercent
 
-    ##Updates the liquid within a rock object (oil and water)
-    ##Parameters: newOil (float) and newWater (float) are the values of oil and
-    ##water that the rock object should be updated with
-    def updateLiquid(self, newOil, newWater):
-        self.oilPercent = newOil
-        self.waterPercent = newWater
+            #self.porosity = calculateInitialPorosity(oilPercent,waterPercent)
+            self.porosity = porosity
 
-    ##Returns the x, y, z coordinates of a rock object
-    def getLocation(self):
-        coordinates = [self.x, self.y, self.z]
-        return coordinates
+            self.parentField = parentField
 
-    ##Updates the porosity of a rock object
-    ##Parameter: newPorosity (float) is the updated porosity of the rock object
-    def setPorosity(self, newPorosity):
-        self.porosity = newPorosity
+        """
+            Returns the oil percentage of a rock object
+        """
+        def getOilPercent(self):
+            return self.oilPercent
 
-    ##TODO
-    def getParentField(self):
-        return self.parentField
+        """
+            Returns the water percentage of a rockField object
+        """
+        def getWaterPercent(self):
+            return self.waterPercent
 
-    ##Based off the parameter drawAmount (float) - the amount of liquid to be drawn
-    ##Removes the liquid from a rock object to simulate drilling
-    def drawLiquid(self, drawAmmount):
+        """
+            Returns the porosity of a rock object
+        """
+        def getPorosity(self):
+            return self.porosity
 
-        # empty all liquid if draw amount is more than what is in rock
-        if (drawAmmount > (self.oilPercent + self.waterPercent)):
-            dOil = self.oilPercent
-            dWat = self.waterPercent
+        """
+            Updates the liquid within a rock object (oil and water)
+            
+            Parameters:
+                newOil (float) - new value to set current oil to
+                newWater (float) - new value to set current water to
+        """
+        def updateLiquid(self, newOil, newWater):
+            self.oilPercent = newOil
+            self.waterPercent = newWater
 
-            self.updateLiquid(0,0)
+        """
+            Returns the x, y, z coordinates of a rock object
+        """
+        def getLocation(self):
+            coordinates = [self.x, self.y, self.z]
+            return coordinates
+
+        """
+            Updates the porosity of a rock object
+            
+            Parameter:
+                newPorosity (float) - the updated porosity of the rock object
+        """
+        def setPorosity(self, newPorosity):
+            self.porosity = newPorosity
+
+        """
+            Gets the field in which this rock object is located
+        """
+        def getParentField(self):
+            return self.parentField
+
+        """
+            Removes liquid from the current rock based on the amount to be drawn
+            
+            Parameter:
+                drawAmmount (float) - the amount of liquid to be drawn 
+        """
+        def drawLiquid(self, drawAmmount):
+
+            # empty all liquid if draw amount is more than what is in rock
+            if (drawAmmount > (self.oilPercent + self.waterPercent)):
+                dOil = self.oilPercent
+                dWat = self.waterPercent
+
+                self.updateLiquid(0,0)
+                return dOil,dWat
+
+            dOil = 0
+            dWat = 0
+
+
+            drawAmmount = drawAmmount/2
+
+            # draw water
+            if (drawAmmount > self.waterPercent):
+                dWat = self.waterPercent
+                self.updateLiquid(self.oilPercent,0)
+            else :
+                dWat = drawAmmount
+                self.updateLiquid(self.oilPercent, self.waterPercent - drawAmmount)
+
+            # draw oil
+            if (drawAmmount > self.oilPercent):
+                dOil = self.oilPercent
+                self.updateLiquid(0,self.waterPercent)
+            else:
+                dOil = drawAmmount
+                self.updateLiquid(self.oilPercent - drawAmmount, self.waterPercent)
+
             return dOil,dWat
 
-        dOil = 0
-        dWat = 0
+        """
+        Based off the distance from the drill, this updates the rock's liquid
+        and porosity values
+    
+        Paramters:
+            cummulativePorosity (float) : total porosity of rocks traversed 
+            cummulativeDistance (float) : total distance of rocks traversed
+            Parent (TODO) : rock object draining current rock object
+            drainList (TODO) : list of rocks that have been visited during this drain step
+        """
+        def drain(self, cummulativePorosity, cummulativeDistance, Parent, drainList):
 
 
-        drawAmmount = drawAmmount/2
+            cummulativePorosity += incimentPorosityFactor(self.porosity)
 
-        # draw water
-        if (drawAmmount > self.waterPercent):
-            dWat = self.waterPercent
-            self.updateLiquid(self.oilPercent,0)
-        else :
-            dWat = drawAmmount
-            self.updateLiquid(self.oilPercent, self.waterPercent - drawAmmount)
+            if (cummulativeDistance >= distanceLimit or cummulativePorosity >= porosityLimit):
+                return 0,0
 
-        # draw oil
-        if (drawAmmount > self.oilPercent):
-            dOil = self.oilPercent
-            self.updateLiquid(0,self.waterPercent)
-        else:
-            dOil = drawAmmount
-            self.updateLiquid(self.oilPercent - drawAmmount, self.waterPercent)
+            oilDrawn = 0
+            waterDrawn = 0
 
-        return dOil,dWat
+            ##Self
+            if (self.oilPercent > 0 or self.waterPercent > 0):
 
-    """
-    Based off the distance from the drill, this updates the rock's liquid
-    and porosity values
+                drawAmmount = 0
 
-    Paramters:
-        cummulativePorosity (float) : TODO - Ask VICTOR
-        cummulativeDistance (float) : TODO - Ask VICTOR
-        Parent (TODO) : TODO - Ask VICTOR
-        drainList (TODO) : TODO - Ask VICTOR
-    """
-    def drain(self, cummulativePorosity, cummulativeDistance, Parent, drainList):
+                zFactor = 0
+
+                if (Parent != None):
+                    zFactor = (Parent.z - self.z)
+
+                drawAmmount = drawCalculation(cummulativePorosity, cummulativeDistance, zFactor)
+
+                oilD, waterD = self.drawLiquid(drawAmmount)
+
+                oilDrawn += oilD
+                waterDrawn += waterD
+
+            drainList.append(self)
 
 
-        cummulativePorosity += incimentPorosityFactor(self.porosity)
-        
-        if (cummulativeDistance >= distanceLimit or cummulativePorosity >= porosityLimit):
-            return 0,0
+            ##Neighbors
+            for Rock in self.parentField.getRockNeighbors(self.x,self.y,self.z):
+                if (not(Rock in drainList)):
+                    childOil, childWater = Rock.drain(cummulativePorosity, cummulativeDistance + distanceFactor, self, drainList)
+                    oilDrawn += childOil
+                    waterDrawn += childWater
 
-        oilDrawn = 0
-        waterDrawn = 0
-
-        ##Self
-        if (self.oilPercent > 0 or self.waterPercent > 0):
-
-            drawAmmount = 0
-
-            zFactor = 0
-
-            if (Parent != None):
-                zFactor = (Parent.z - self.z)
-
-            drawAmmount = drawCalculation(cummulativePorosity, cummulativeDistance, zFactor)
-            
-            oilD, waterD = self.drawLiquid(drawAmmount)
-
-            oilDrawn += oilD
-            waterDrawn += waterD
-
-        drainList.append(self)
-
-
-        ##Neighbors
-        for Rock in self.parentField.getRockNeighbors(self.x,self.y,self.z):
-            if (not(Rock in drainList)):
-                childOil, childWater = Rock.drain(cummulativePorosity, cummulativeDistance + distanceFactor, self, drainList)
-                oilDrawn += childOil
-                waterDrawn += childWater
-
-        return oilDrawn,waterDrawn
+            return oilDrawn,waterDrawn

@@ -66,13 +66,17 @@ class OilFieldEnv(gym.Env):
 
         return self.getCurrentState()
 
-    ##Repositions the drill at the starting x, y, z values
+    """
+        Repositions the drill at the starting x, y, z values
+    """
     def resetDrillInfo(self):
         self.drillx = self.drillStartx
         self.drilly = self.drillStarty
         self.drillz = self.drillStartz
 
-    ##Returns the current liquid values within the oil field
+    """
+        Returns the current liquid values within the oil field
+    """
     def getCurrentState(self):
         return center(self.oilField.getCurrentLiquidLevels(), self.drillx, self.drilly, self.drillz, self.length)
 
@@ -87,7 +91,7 @@ class OilFieldEnv(gym.Env):
     def calculateReward(self,oilDrawn,waterDrawn):
         return (oilDrawn - waterDrawn)
 
-    ##Determine best way to transfer actions
+
     actionSpace = {0: [0,0,-1], 1: [0,-1,0],
                    2: [1,0,0],  3: [0,1,0],
                    4: [-1,0,0], 5: [0,0,1]}
@@ -100,12 +104,18 @@ class OilFieldEnv(gym.Env):
     # 4 - move west directly
     # 5 - move down directly
 
-    ##Returns the current x, y, z position of the drill
+    """
+        Returns the current x, y, z position of the drill
+    """
     def getLocationVector(self):
         return [self.drillx,self.drilly,self.drillz]
 
-    ##Checks to see if the drill is inbounds and can actually drill something
-    ##locationVector (array) - the location of the drill's current position
+    """
+        Checks to see if the drill is inbounds and can actually drill something
+        
+        Parameter:
+            locationVector (array) - the location of the drill's current position
+    """
     def validLocation(self,locationVector):
         return  ((0 <= locationVector[0] and locationVector[0] < self.length ) and
                  (0 <= locationVector[1] and locationVector[1] < self.width ) and
@@ -135,8 +145,12 @@ class OilFieldEnv(gym.Env):
         self.storedReward = self.calculateReward(oilDrawn, waterDrawn)
 
 
-    ##Updates the drill's position based off the agent's action
-    ##action (int) - the move the agent is supposed to perform
+    """
+    Updates the drill's position based off the agent's action
+
+    Parameters:
+        action (int) - the move the agent is supposed to perform
+    """
     def performAction(self, action):
         currentLocation = self.getLocationVector()
         movementVector = self.actionSpace[action]
@@ -174,7 +188,9 @@ class OilFieldEnv(gym.Env):
 
         return self.getCurrentState(), self.storedReward, done, {}
 
-    ##Reassigns variables to starting values
+    """
+        Reassigns variables to starting values
+    """
     def reset(self):
         ##print results before reset
         if (self.current_episode % 1000 == 0):
@@ -189,8 +205,10 @@ class OilFieldEnv(gym.Env):
         self.resetDrillInfo()
 
         return self.getCurrentState()
-      
-    ##Creates a figure to visualize the oil field   
+
+    """
+        Creates a figure to visualize the oil field
+    """
     def render_test(self, mode='human'):
 
         '''
@@ -240,8 +258,7 @@ class OilFieldEnv(gym.Env):
             z_fig.write_image("images/z_fig" + str(self.render_num) + ".png")
             print("rendered " + str(self.render_num))
         self.render_num+=1
-        
-    ##def close(self):
+
     def seed(self, seed):
         self._seed = seed;
 
