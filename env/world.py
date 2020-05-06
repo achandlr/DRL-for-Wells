@@ -10,6 +10,11 @@ mapper = {"_": NOTHING, "P": PLAYER, "O": OIL, "W": WATER}
 mapperInv = {NOTHING: "_", PLAYER: "P", OIL: "O", WATER: "W", WALL: "|"}
 
 def parseWorld():
+    """
+    Reads in a file and stores each value in the file into a new flattened
+    array representing the total field
+
+    """
     worldFile = open("env/world.txt", "r")
     totalField = None
     for line in worldFile.readlines():
@@ -22,9 +27,12 @@ def parseWorld():
     return totalField
 
 def printWorld(world):
+    """
+    Goes through each element in the world and prints it out in row major order
+    """
+
     final = ""
     for row in world:
         for el in row:
             print(mapperInv[el[0]], end="")
         print("")
-

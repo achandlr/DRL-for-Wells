@@ -1,0 +1,27 @@
+field_env.py : General environment. Contains structure for agent to run on. 
+
+Field2D.py : A 2-dimensional oil field. Has a rock class that defines properties of rocks and how they work when drilled. 
+
+world.py : Reads in a text file version of the world and formats an array version of the file
+
+world.txt : the text version of an oil field. world.py reads this file in
+
+oilfield_env.py : Environment that most of the testing utilizes. This file calculates rewards, moves the drill, counts steps etc. 
+
+OilField3D : Similar to Field2D.py. Adds in functionality for a third dimension. Has an updated rock class and methods to retrieve individual rocks in a three-dimensional field. 
+
+readData.py : Reads in our created data and uses it to populate the oil well with values
+
+Sample_Rendering.ipynb : Renders a visualization of the well and the drill's current position by showing how liquid values change with time
+
+smallStructure : the fake data we created to populate the oil field
+
+agent.py : Is the agent that trains on the environment and tries to achieve the maximum reward
+
+checker.py : Ensures the environment the agent is running on is compatible with Open AI Gym guidelines
+
+CustomEvalCallback.py : Evaluates the agents performance to track if it is learning from its training
+
+model.py : Creates a tensorboard output of the agent's training to track its performance over time. 
+
+setup.sh : Creates a directory to store the agent's best results 
