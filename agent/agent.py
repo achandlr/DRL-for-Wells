@@ -28,8 +28,12 @@ SEED = 510
 N_PROCS = 8
 NUM_STEPS = int(1e6)
 
-##begin training
+# begin training
 def run():
+    """
+    The main function of the agent
+    Parses argv and executes accordingly
+    """
     visualize = sys.argv[1] == "v" if len(sys.argv) > 1 else False
     resume = sys.argv[1] == "r" if len(sys.argv) > 1 else False
     evaluate = visualize or (sys.argv[1] == "e" if len(sys.argv) > 1 else False)

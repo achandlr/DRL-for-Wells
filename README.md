@@ -1,4 +1,4 @@
-#Explanation of files:
+# Explanation of files:
 
 ```Data/ : Contains sample data for use with generation.
 GraphAlgo/ : Contains graph algorithm code.
