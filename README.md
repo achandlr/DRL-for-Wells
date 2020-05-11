@@ -1,5 +1,6 @@
-Explanation of files:
-Data/ : Contains sample data for use with generation.
+#Explanation of files:
+
+```Data/ : Contains sample data for use with generation.
 GraphAlgo/ : Contains graph algorithm code.
 agent/ : Contains agent and environment code.
 ml.yml : Contains necessary conda config.
@@ -24,4 +25,4 @@ agent/agent.py : The starter point for training the agent. Supports training, re
 agent/model.py : The model used behind the scenes, a subclass of a stable-baselines class.
 agent/checker.py : Ensures the environment the agent is running on is compatible with Open AI Gym guidelines.
 agent/setup.sh : Creates a directory to store the agent's best results.
-agent/play.sh : Allows you to "play" an environment.
+agent/play.sh : Allows you to "play" an environment.```
