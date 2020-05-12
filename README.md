@@ -2,6 +2,7 @@
 
 ```Data/ : Contains sample data for use with generation.
 GraphAlgo/ : Contains graph algorithm code.
+GraphAlgo/src/algo/Main.java : Runs the graph algorithm code
 agent/ : Contains agent and environment code.
 ml.yml : Contains necessary conda config.
 
